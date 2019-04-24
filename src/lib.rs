@@ -71,10 +71,25 @@ cases.
 #![allow(deprecated)]
 
 #![deny(missing_docs)]
-#![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(any(not(feature = "std"),
+                all(feature = "mesalock_sgx",
+                    not(target_env = "sgx"))), no_std)]
+#![cfg_attr(all(target_env = "sgx", target_vendor = "mesalock"), feature(rustc_private))]
 
-#[cfg(feature = "std")]
+#[cfg(all(feature = "std",
+          not(all(feature = "mesalock_sgx",
+                  not(target_env = "sgx")))))]
 extern crate core;
+
+#[cfg(test)]
+#[macro_use]
+extern crate doc_comment;
+
+#[cfg(test)]
+doctest!("../README.md");
+
+#[cfg(all(feature = "mesalock_sgx", not(target_env = "sgx")))]
+extern crate sgx_tstd as std;
 
 #[cfg(test)]
 #[macro_use]
